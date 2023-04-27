@@ -1,0 +1,7 @@
+{
+  "name": "profesional-vue",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
