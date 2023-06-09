@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
-  appName: 'profesional-vue',
+  appName: 'Profesional Remis',
   webDir: 'dist',
   bundledWebRuntime: false
 };
