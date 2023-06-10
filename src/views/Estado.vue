@@ -43,6 +43,9 @@ import { Geolocation } from '@capacitor/geolocation';
 import backendApi from '@/api/backendApi';
 import { useRouter } from 'vue-router';
 
+import { Plugins } from '@capacitor/core';
+const { BackgroundGeolocation } = Plugins;
+
 const router = useRouter();
 const ubicacion = reactive({
   coords: JSON.parse(localStorage.getItem('ubicacion'))
@@ -50,7 +53,8 @@ const ubicacion = reactive({
 const user = JSON.parse(localStorage.getItem('user'))
 
 onMounted(()=>{
-    checkAuth();
+    //checkAuth();
+    startBackgroundGeolocation();
 })
 
 const checkAuth = () =>{
@@ -92,6 +96,35 @@ const onChangeOcupado = () => {
     // Maneja el error
     console.log('error',error);
   });
+}
+
+
+
+
+
+
+const startBackgroundGeolocation = async () => {
+      // Solicita los permisos necesarios para acceder a la geolocalización
+      await BackgroundGeolocation.requestPermissions();
+
+      // Configura los ajustes de la geolocalización en segundo plano
+      await BackgroundGeolocation.configure({
+        // Configura las opciones según tus necesidades
+        desiredAccuracy: 10,
+        stationaryRadius: 20,
+        distanceFilter: 30,
+        debug: true,
+        stopOnTerminate: false,
+      });
+
+      // Inicia la geolocalización en segundo plano
+      await BackgroundGeolocation.start();
+
+      // Escucha los eventos de geolocalización
+      BackgroundGeolocation.addListener('location', (location) => {
+        console.log('Nueva ubicación desde nueva libreria:', location);
+        // Realiza las acciones necesarias con la ubicación actualizada
+      });
 }
 </script>
 

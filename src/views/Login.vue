@@ -132,7 +132,7 @@ const login = () => {
   .catch(error => {
     // Maneja el error
     errores.data = error.response
-    console.log('error',error);
+    console.log('errorrrrr',JSON.stringify(error));
     
   });
 }
