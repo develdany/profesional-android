@@ -42,9 +42,10 @@ import { reactive, onMounted} from 'vue';
 import { Geolocation } from '@capacitor/geolocation';
 import backendApi from '@/api/backendApi';
 import { useRouter } from 'vue-router';
+import { geolocationBackground } from '../utils/geolocationBackground'
 
-import { Plugins } from '@capacitor/core';
-const { BackgroundGeolocation } = Plugins;
+import {registerPlugin} from "@capacitor/core";
+const BackgroundGeolocation = registerPlugin("BackgroundGeolocation");
 
 const router = useRouter();
 const ubicacion = reactive({
@@ -53,32 +54,32 @@ const ubicacion = reactive({
 const user = JSON.parse(localStorage.getItem('user'))
 
 onMounted(()=>{
-    //checkAuth();
-    startBackgroundGeolocation();
+    checkAuth();
+    //getCurrentLocation();
 })
 
 const checkAuth = () =>{
   if (user) {
-    let intervalId = setInterval(requestUbication, 4000);
+    let intervalId = setInterval(getCurrentLocation, 4000);
     localStorage.setItem('intervalId', intervalId);
   }else{
     router.push('/');
   }
 }
 
-const requestUbication = async () => {
-  await Geolocation.getCurrentPosition({ enableHighAccuracy: true })
-    .then((result) => {
-      console.log('coords',result);
-      ubicacion.coords.latitud = result.coords.latitude
-      ubicacion.coords.longitud = result.coords.longitude
-      backendApi.put(`/ubicaciones/${ubicacion.coords.id}`,ubicacion.coords)
-      .then( response => {
-        console.log(response);
-      })
-      //console.log('resuuuuu',result.coords.latitude);
-    })
-}
+// const requestUbication = async () => {
+//   await Geolocation.getCurrentPosition({ enableHighAccuracy: true })
+//     .then((result) => {
+//       console.log('coords',result);
+//       ubicacion.coords.latitud = result.coords.latitude
+//       ubicacion.coords.longitud = result.coords.longitude
+//       backendApi.put(`/ubicaciones/${ubicacion.coords.id}`,ubicacion.coords)
+//       .then( response => {
+//         console.log(response);
+//       })
+//       //console.log('resuuuuu',result.coords.latitude);
+//     })
+// }
 
 const estado = reactive({
   ocupado:true
@@ -100,32 +101,18 @@ const onChangeOcupado = () => {
 
 
 
+const getCurrentLocation = () => {
+  geolocationBackground((location) => {
+    console.log('ubi desde la nueva libreria', location);
+    ubicacion.coords.latitud = location.latitude
+    ubicacion.coords.longitud = location.longitude
+    backendApi.put(`/ubicaciones/${ubicacion.coords.id}`,ubicacion.coords)
+    .then( response => {
+      console.log(response);
+    })
+  }, 5000); // Espera 5 segundos antes de devolver la ubicación
+};
 
-
-
-const startBackgroundGeolocation = async () => {
-      // Solicita los permisos necesarios para acceder a la geolocalización
-      await BackgroundGeolocation.requestPermissions();
-
-      // Configura los ajustes de la geolocalización en segundo plano
-      await BackgroundGeolocation.configure({
-        // Configura las opciones según tus necesidades
-        desiredAccuracy: 10,
-        stationaryRadius: 20,
-        distanceFilter: 30,
-        debug: true,
-        stopOnTerminate: false,
-      });
-
-      // Inicia la geolocalización en segundo plano
-      await BackgroundGeolocation.start();
-
-      // Escucha los eventos de geolocalización
-      BackgroundGeolocation.addListener('location', (location) => {
-        console.log('Nueva ubicación desde nueva libreria:', location);
-        // Realiza las acciones necesarias con la ubicación actualizada
-      });
-}
 </script>
 
 <style scoped>
